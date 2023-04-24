@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# MULTIDEB FORMAT: literally a tar.gz file with debs inside it. #simpleisbetter
+
+CreateMDEB() {
+    cd $1
+    tar -czvf "$1.tar.gz" *
+    mv $1.tar.gz ../
+    cd ..
+}
+
+ReadMDEB() {
+    mkdir "$1-tmpMDEB"
+    tar -xzf $1 -C "$1-tmpMDEB"
+
+    TEMP_DIR="$1-tmpMDEB"
+    for file in "$TEMP_DIR"/*
+    do
+        sudo dpkg -i $file
+    done
+
+    rm -r "$1-tmpMDEB"
+}
+
+DownloadMDEB() {
+    curl --head --silent --fail "$1" > /dev/null
+    if [ "$?" != "0" ]; then
+        wget "https://github.com/z-izz/mdebs/raw/zi/$1.tar.gz"
+        ReadMDEB $(basename $1.tar.gz)
+        rm $(basename $1.tar.gz)
+    else
+        wget $1
+        ReadMDEB $(basename $1)
+        rm $(basename $1)
+    fi
+}
+
+Showusage() {
+    echo "Usage: $0 [option]"
+    echo
+    echo "options:"
+    echo "create [folder] - Creates a multideb archive from a folder of deb files."
+    echo "local [mdeb file] - Installs all debs from a multideb archive stored locally."
+    echo "remote [mdeb link] - Installs all debs from a multideb archive stored remotely."
+}
+
+sudo echo "multideb v1.0.6"
+
+
+if [ "$1" != "create" ] && [ "$1" != "local" ] && [ "$1" != "remote" ]; then
+    Showusage
+    exit 0
+fi
+
+if [ "$1" == "create" ]; then
+    if [ -z "$2" ]; then
+        echo "multideb: missing operand after '$1'"
+    else
+        CreateMDEB $2
+    fi
+fi
+
+if [ "$1" == "local" ]; then
+    if [ -z "$2" ]; then
+        echo "multideb: missing operand after '$1'"
+    else
+        ReadMDEB $2
+    fi
+fi
+
+if [ "$1" == "remote" ]; then
+    if [ -z "$2" ]; then
+        echo "multideb: missing operand after '$1'"
+    else
+        DownloadMDEB $2
+    fi
+fi
