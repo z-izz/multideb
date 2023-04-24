@@ -5,7 +5,7 @@
 <h1 align="center">multideb</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/github/languages/code-size/z-izz/vcpu?style=flat-square">
+  <img src="https://img.shields.io/github/languages/code-size/z-izz/multideb?style=flat-square">
 </p>
 
 <p align="center">📦 one file, one command, lots of packages installed.</p>
